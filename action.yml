@@ -1,0 +1,45 @@
+name: 'setup_skicka_action'
+description: 'Setup skicka'
+inputs:
+  GOOGLE_APIKEY:
+    description: 'GOOGLE_APIKEY'
+    required: true
+  GOOGLE_CLIENT_SECRET:
+    description: 'GOOGLE_CLIENT_SECRET'
+    required: true   
+  SKICKA_TOKENCACHE_JSON:
+    description: 'SKICKA_TOKENCACHE_JSON'
+    required: true    
+runs:
+  using: 'composite'
+  steps:
+  - uses: actions/setup-go@v3
+    with:
+      go-version: '1.18.0-rc.1' # The Go version to download (if necessary) and use.
+  - name: skicka install
+    shell: bash
+    run: |
+      # skicka install	
+      go install github.com/google/skicka@latest
+      # change dir
+      cd ${{ github.action_path }}	
+      # .skicka.tokencache.json
+      echo "${{ inputs.SKICKA_TOKENCACHE_JSON }}" > .skicka.tokencache.json
+      sed -i -e "s/ClientId:/\"ClientId\":\"/g" .skicka.tokencache.json
+      sed -i -e "s/,access_token:/\",\"access_token\":\"/g" .skicka.tokencache.json
+      sed -i -e "s/,token_type:/\",\"token_type\":\"/g" .skicka.tokencache.json
+      sed -i -e "s/,refresh_token:/\",\"refresh_token\":\"/g" .skicka.tokencache.json
+      sed -i -e "s/,expiry:/\",\"expiry\":\"/g" .skicka.tokencache.json
+      sed -i -e "s/}/\"}/g" .skicka.tokencache.json
+      # .skicka.config
+      TMP_CLIENTID=`cat .skicka.tokencache.json | jq '.ClientId'`
+      TMP_CLIENTSECRET=${{ inputs.GOOGLE_CLIENT_SECRET }}
+      TMP_APIKEY=${{ inputs.GOOGLE_APIKEY }}
+      echo $TMP_CLIENTID
+      sed -i -e "s/replace_clientid/$TMP_CLIENTID/g" .skicka.config
+      sed -i -e "s/replace_clientsecret/$TMP_CLIENTSECRET/g" .skicka.config
+      sed -i -e "s/replace_apikey/$TMP_APIKEY/g" .skicka.config
+      chmod 600 .skicka.tokencache.json
+      chmod 600 .skicka.config	  
+      mv .skicka.tokencache.json /home/runner/.
+      mv .skicka.config /home/runner/.
