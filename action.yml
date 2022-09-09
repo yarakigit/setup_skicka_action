@@ -19,6 +19,8 @@ runs:
   - name: skicka install
     shell: bash
     run: |
+      # save current path
+      TMP_PATH=`pwd`    
       # skicka install	
       go install github.com/google/skicka@latest
       # change dir
@@ -43,3 +45,5 @@ runs:
       chmod 600 .skicka.config	  
       mv .skicka.tokencache.json /home/runner/.
       mv .skicka.config /home/runner/.
+      # change default dir
+      cd $TMP_PATH
