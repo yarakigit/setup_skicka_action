@@ -1,0 +1,40 @@
+name: 'check setup_skicka_action'
+
+on:
+  schedule:
+    - cron: '0 15 * * *'
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  setup-skicka-sample:
+    runs-on: ubuntu-latest 
+    env:
+      SKICKA_TOKENCACHE_JSON: ${{ secrets.SKICKA_TOKENCACHE_JSON }}      
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_APIKEY: ${{ secrets.GOOGLE_APIKEY }}      
+    steps: 
+      - uses: yarakigit/setup_skicka_action@main
+        with:
+          SKICKA_TOKENCACHE_JSON: ${{ env.SKICKA_TOKENCACHE_JSON }}      
+          GOOGLE_CLIENT_SECRET: ${{ env.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_APIKEY: ${{ env.GOOGLE_APIKEY }}
+      - name: 'skicka upload'
+        env:
+          TZ: 'Asia/Tokyo'      
+        run: |
+          CURRENT_DATETIME=$(date +'%Y/%m/%d(%a) %H:%M:%S')
+          echo "upload $CURRENT_DATETIME by GitHubActions" > log.txt
+          skicka upload log.txt bot-dev/check_GitHubActions-setip_skicka_action
+  keep-alive-action:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: "Keepalive Action"
+        uses: yarakigit/keepalive-action@main
+        with:
+          GITHUB_TOKEN: ${{env.GITHUB_TOKEN}}	  
