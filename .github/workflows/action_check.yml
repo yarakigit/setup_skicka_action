@@ -27,7 +27,7 @@ jobs:
         run: |
           CURRENT_DATETIME=$(date +'%Y/%m/%d(%a) %H:%M:%S')
           echo "upload $CURRENT_DATETIME by GitHubActions" > log.txt
-          skicka -no-browser-auth upload log.txt bot-dev/check_GitHubActions-setip_skicka_action
+          skicka -no-browser-auth upload -ignore-times log.txt bot-dev/check_GitHubActions-setip_skicka_action
   keep-alive-action:
     runs-on: ubuntu-latest
 
